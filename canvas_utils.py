@@ -9,10 +9,10 @@ def setup_game_canvas():
 
     return canvas_screen_size, canvas_fps, canvas_surface, canvas_surface_rect, game_clock
 
-def create_text(text_str):
+def create_text(text_str, font_size=60):
     text = text_str
     newtext = text.encode("utf-8").decode("utf-8")
-    gamefont = pygame.font.Font("fonts/ipaexg.ttf", 60)
+    gamefont = pygame.font.Font("fonts/ipaexg.ttf", font_size)
     gametext = gamefont.render(newtext, True, (225, 225, 225))
     gametext_rect = gametext.get_rect()
     return gametext, gametext_rect
@@ -26,6 +26,8 @@ def render_text_on_screen(canvas_surface, canvas_surface_rect, gametext, gametex
         text_y = canvas_surface_rect.centery - gametext_rect.height / 2 + y_offset
     elif y_align == 'top':
         text_y = y_offset
+    elif y_align == 'bottom':
+        text_y = canvas_surface_rect.height - gametext_rect.height - y_offset
     canvas_surface.blit(gametext, (text_x, text_y))
     # Setup text
     if False:

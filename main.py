@@ -16,8 +16,22 @@ game_time_delta = 0
 
 game_session = {
     'TYPING_SCENE_TIMER': 11,
-    'word_input': ''
+    'word_input': '',
+    'current_word': None,
 }
+
+import pandas as pd
+vocabs_df = pd.read_csv("word_lists/all_chapters_vocabs.csv")
+vocabs_df = vocabs_df[vocabs_df['kanji_form'].notna()]
+vocabs_df = vocabs_df[vocabs_df['kanji_form'] != '-']
+vocabs_df = vocabs_df[(vocabs_df['chapter'] >= 40) & (vocabs_df['chapter'] <= 45)]
+game_session['word_list'] = vocabs_df
+
+katakana_translate_df = pd.read_csv("katakana_mapping_list.csv")
+katakana_translate_dict = {}
+for idx, row in katakana_translate_df.iterrows():
+    katakana_translate_dict[row['romanji']] = row['katakana']
+game_session['katakana_translate_dict'] = katakana_translate_dict
 
 while ended == False:
     # Setup background
