@@ -18,10 +18,18 @@ def create_text(text_str, font_size=60):
     return gametext, gametext_rect
     # canvas_surface.blit(gametext, (0, 0))
 
-def render_text_on_screen(canvas_surface, canvas_surface_rect, gametext, gametext_rect, 
+def render_text_on_screen(canvas_surface, canvas_surface_rect, gametext, 
+                          x_align = 'center', x_offset=0, 
                           y_align = 'center', y_offset=0):
+    gametext_rect = gametext.get_rect()
     # Calculate x and y using _align setting
-    text_x = canvas_surface_rect.centerx - gametext_rect.width / 2
+    if x_align == 'center':
+        text_x = canvas_surface_rect.centerx - gametext_rect.width / 2
+    elif x_align == 'top':
+        text_x = x_offset
+    elif x_align == 'bottom':
+        text_x = canvas_surface_rect.width - gametext_rect.width - x_offset
+
     if y_align == 'center':
         text_y = canvas_surface_rect.centery - gametext_rect.height / 2 + y_offset
     elif y_align == 'top':
