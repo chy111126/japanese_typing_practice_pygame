@@ -2,6 +2,8 @@ import pygame
 
 from canvas_utils import setup_game_canvas, render_text_on_screen, create_text
 
+TIMER_DEFAULT_VALUE = 91
+
 class TypingScene:
 
     @staticmethod
@@ -9,10 +11,13 @@ class TypingScene:
         # Update pass-by-ref game session
         game_session.update({
             # game data
-            'TYPING_SCENE_TIMER': 11,
+            'TYPING_SCENE_TIMER': TIMER_DEFAULT_VALUE,
             'word_input': '',
             'current_word': None,
-            'lives_remaining': 4,
+            'lives_remaining': 99,
+            'keyboard_active': True,
+            'recent_word_list': list(),
+            'answered_wrong': False,
         })
         return
 
@@ -25,14 +30,19 @@ class TypingScene:
             game_session['next_scene'] = 'TitleScene'
             return
 
-        # Draw a word from word list
         if game_session['current_word'] is None:
             vocabs_df = game_session['word_list']
-            random_vocab = vocabs_df.sample(1).iloc[0]
-            japanese_form = random_vocab['japanese_form']
-            kanji_form = random_vocab['kanji_form']
-            romanji_form = str(random_vocab['romanji'])
-            explanation = random_vocab['explanation']
+            # Draw a word from word list (that is not recently shown)
+            is_non_recent_word_drawn = False
+            while not is_non_recent_word_drawn:
+                random_vocab = vocabs_df.sample(1).iloc[0]
+                japanese_form = random_vocab['japanese_form']
+                kanji_form = random_vocab['kanji_form']
+                romanji_form = str(random_vocab['romanji'])
+                explanation = random_vocab['explanation']
+                print(romanji_form not in game_session['recent_word_list'])
+                if romanji_form not in game_session['recent_word_list']:
+                    is_non_recent_word_drawn = True
             game_session['current_word'] = {
                 'japanese_form': japanese_form,
                 'kanji_form': kanji_form,
@@ -46,6 +56,7 @@ class TypingScene:
             explanation = game_session['current_word']['explanation']
 
         # Compute word_input to display form (with katakana)
+        # TODO: Better matching engine for cases like bonodori -> bon o do ri (but not bo no do ri)
         katakana_translate_dict = game_session['katakana_translate_dict']
         word_input = game_session['word_input']
         katakana_word_input = ''
@@ -90,23 +101,28 @@ class TypingScene:
         render_text_on_screen(canvas_surface, canvas_surface_rect, jp_word, y_offset=-60)
         romanji_word, romanji_word_rect = create_text(katakana_word_input, font_size=30)
         render_text_on_screen(canvas_surface, canvas_surface_rect, romanji_word, y_offset=60)
-        romanji_answer, romanji_answer_rect = create_text(romanji_form, font_size=30)
-        render_text_on_screen(canvas_surface, canvas_surface_rect, romanji_answer, y_align='bottom', y_offset=60)
-        explanation_answer, explanation_answer_rect = create_text(explanation, font_size=30)
+
+        if game_session['answered_wrong']:
+            romanji_answer, romanji_answer_rect = create_text(romanji_form, font_size=30)
+            render_text_on_screen(canvas_surface, canvas_surface_rect, romanji_answer, y_align='bottom', y_offset=60)
+
+        explanation_answer, explanation_answer_rect = create_text(explanation, font_size=30, font_locale='zh-hk')
         render_text_on_screen(canvas_surface, canvas_surface_rect, explanation_answer, y_align='bottom', y_offset=120)
 
         # Update timer and format as 00:xx
-        game_session['TYPING_SCENE_TIMER'] -= game_time_delta / 1000
-        if game_session['TYPING_SCENE_TIMER'] < 1:
-            game_session['TYPING_SCENE_TIMER'] = 0
-            # Reduce a life and draw a new word
-            game_session.update({
-                # game data
-                'TYPING_SCENE_TIMER': 11,
-                'word_input': '',
-                'current_word': None,
-            })
-            game_session['lives_remaining'] -= 1
+        if game_session['keyboard_active']:
+            game_session['TYPING_SCENE_TIMER'] -= game_time_delta / 1000
+            if game_session['TYPING_SCENE_TIMER'] < 1:
+                game_session['TYPING_SCENE_TIMER'] = 0
+                # Reduce a life and draw a new word
+                game_session.update({
+                    # game data
+                    'TYPING_SCENE_TIMER': TIMER_DEFAULT_VALUE,
+                    'word_input': '',
+                    'current_word': None,
+                    'answered_wrong': False,
+                })
+                game_session['lives_remaining'] -= 1
         if int(game_session['TYPING_SCENE_TIMER']) < 10:
             typing_timer_str = f"00:0{int(game_session['TYPING_SCENE_TIMER'])}"
         else:
@@ -123,25 +139,32 @@ class TypingScene:
 
     @staticmethod
     def handle_input_event(event, game_session):
-        active = True
-        if event.type == pygame.KEYDOWN:
+        active = game_session['keyboard_active']
+        if active and event.type == pygame.KEYDOWN:
             if active:
                 if event.key == pygame.K_RETURN:
                     # Check if input word is correct
                     romanji_form = game_session['current_word']['romanji_form']
                     word_input = game_session['word_input']
                     if word_input == romanji_form:
-                        pass
+                        # Reset timer and allow drawing next word
+                        if len(game_session['recent_word_list']) < 10:
+                            game_session['recent_word_list'].append(game_session['current_word']['romanji_form'])
+                        else:
+                            game_session['recent_word_list'].append(game_session['current_word']['romanji_form'])
+                            game_session['recent_word_list'] = game_session['recent_word_list'][1:]
+                        game_session.update({
+                            # game data
+                            'TYPING_SCENE_TIMER': TIMER_DEFAULT_VALUE,
+                            'word_input': '',
+                            'current_word': None,
+                            'answered_wrong': False,
+                        })
                     else:
+                        # game_session['keyboard_active'] = False
                         game_session['lives_remaining'] -= 1
-
-                    # Reset timer and allow drawing next word
-                    game_session.update({
-                        # game data
-                        'TYPING_SCENE_TIMER': 11,
-                        'word_input': '',
-                        'current_word': None,
-                    })
+                        game_session['word_input'] = ''
+                        game_session['answered_wrong'] = True
                 elif event.key == pygame.K_BACKSPACE:
                     game_session['word_input'] = game_session['word_input'][:-1]
                 else:

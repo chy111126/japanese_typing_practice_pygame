@@ -9,10 +9,14 @@ def setup_game_canvas():
 
     return canvas_screen_size, canvas_fps, canvas_surface, canvas_surface_rect, game_clock
 
-def create_text(text_str, font_size=60):
+def create_text(text_str, font_size=60, font_locale='jp'):
     text = text_str
     newtext = text.encode("utf-8").decode("utf-8")
-    gamefont = pygame.font.Font("fonts/ipaexg.ttf", font_size)
+    # TODO: Add font caching
+    if font_locale == 'jp':
+        gamefont = pygame.font.Font("fonts/ipaexg.ttf", font_size)
+    elif font_locale == 'zh-hk':
+        gamefont = pygame.font.Font("fonts/LXGWWenKaiMonoTC-Medium.ttf", font_size)
     gametext = gamefont.render(newtext, True, (225, 225, 225))
     gametext_rect = gametext.get_rect()
     return gametext, gametext_rect
