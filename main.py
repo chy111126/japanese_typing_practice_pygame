@@ -4,6 +4,8 @@ from canvas_utils import setup_game_canvas, render_text_on_screen, create_text
 from scenes.title import TitleScene
 from scenes.typing import TypingScene
 
+from input_utils import init_word_list
+
 pygame.init()
 pygame.key.set_repeat(500, 100)
 
@@ -20,18 +22,7 @@ game_session = {
     'next_scene': 'TitleScene',
 }
 
-import pandas as pd
-vocabs_df = pd.read_csv("word_lists/all_chapters_vocabs.csv")
-vocabs_df = vocabs_df[vocabs_df['kanji_form'].notna()]
-vocabs_df = vocabs_df[vocabs_df['kanji_form'] != '-']
-vocabs_df = vocabs_df[(vocabs_df['chapter'] >= 20) & (vocabs_df['chapter'] <= 30)]
-game_session['word_list'] = vocabs_df
-
-katakana_translate_df = pd.read_csv("katakana_mapping_list.csv")
-katakana_translate_dict = {}
-for idx, row in katakana_translate_df.iterrows():
-    katakana_translate_dict[row['romanji']] = row['katakana']
-game_session['katakana_translate_dict'] = katakana_translate_dict
+init_word_list(game_session)
 
 current_scene = None
 ended = False
