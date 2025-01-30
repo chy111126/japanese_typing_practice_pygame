@@ -5,7 +5,7 @@ def init_word_list(game_session):
     vocabs_df = pd.read_csv("word_lists/all_chapters_vocabs.csv")
     vocabs_df = vocabs_df[vocabs_df['kanji_form'].notna()]
     vocabs_df = vocabs_df[vocabs_df['kanji_form'] != '-']
-    vocabs_df = vocabs_df[(vocabs_df['chapter'] >= 20) & (vocabs_df['chapter'] <= 30)]
+    vocabs_df = vocabs_df[(vocabs_df['chapter'] >= 40) & (vocabs_df['chapter'] <= 45)]
     game_session['word_list'] = vocabs_df
 
     katakana_translate_df = pd.read_csv("word_lists/katakana_mapping_list.csv")

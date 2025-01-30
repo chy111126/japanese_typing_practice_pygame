@@ -14,10 +14,10 @@ class TitleScene:
     def render_scene(canvas_surface, game_session, game_time_delta):
         canvas_surface_rect = canvas_surface.get_rect()
 
-        jp_word, jp_word_rec = create_text("Typing game!", font_size=60)
+        jp_word = create_text("Typing game!", font_size=60)
         render_text_on_screen(canvas_surface, canvas_surface_rect, jp_word, y_offset=-60)
 
-        jp_word, jp_word_rec = create_text("Press Enter to start", font_size=30)
+        jp_word = create_text("Press Enter to start", font_size=30)
         render_text_on_screen(canvas_surface, canvas_surface_rect, jp_word, y_offset=60)
         return
 

@@ -18,8 +18,8 @@ def create_text(text_str, font_size=60, font_locale='jp'):
     elif font_locale == 'zh-hk':
         gamefont = pygame.font.Font("fonts/LXGWWenKaiMonoTC-Medium.ttf", font_size)
     gametext = gamefont.render(newtext, True, (225, 225, 225))
-    gametext_rect = gametext.get_rect()
-    return gametext, gametext_rect
+    # gametext_rect = gametext.get_rect()
+    return gametext
     # canvas_surface.blit(gametext, (0, 0))
 
 def render_text_on_screen(canvas_surface, canvas_surface_rect, gametext, 

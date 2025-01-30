@@ -3,6 +3,7 @@ from canvas_utils import setup_game_canvas, render_text_on_screen, create_text
 
 from scenes.title import TitleScene
 from scenes.typing import TypingScene
+from scenes.game_over import GameOverScene
 
 from input_utils import init_word_list
 
@@ -19,7 +20,7 @@ game_session = {
     # 'current_word': None,
     # 'lives_remaining': 4,
 
-    'next_scene': 'TitleScene',
+    'next_scene': 'TypingScene',
 }
 
 init_word_list(game_session)
@@ -38,6 +39,8 @@ while ended == False:
             current_scene = TitleScene
         elif next_scene == 'TypingScene':
             current_scene = TypingScene
+        elif next_scene == 'GameOverScene':
+            current_scene = GameOverScene
         game_session['next_scene'] = None
         current_scene.init_scene(game_session)
 
